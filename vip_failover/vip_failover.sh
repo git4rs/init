@@ -1,9 +1,18 @@
 #!/bin/bash
+## Purpose:- To Achieve automatic VIP Failover in AWS Environment as available tools such as (Keepalived,Heartbeat) does not 
+## work in AWS since AWS does not support Multicast
+## Please change following values:-
+  ## <VIP>
+  ## <SELF_CHK>
+  ## <REMOTE_CHK>
+  ## <STATUS>
+
 
 VIP='10.0.5.74'
 baseDir='/etc/vip_failover'
 ifaceDetails="$baseDir/ifaceDetails.txt"
 
+if [ ! -d $baseDir ]; then mkdir -p $baseDir;fi
 date
 
 cat /dev/null > $ifaceDetails 
