@@ -31,7 +31,7 @@ else
 		exit
 	else
 		## Chk remote Nginx
-		nginx_remote=$(/usr/bin/curl -k -s -o /dev/null -w "%{http_code}" http://$VIP/health)
+		nginx_remote=$(/usr/bin/curl -k -s -o /dev/null -w "%{http_code}" http://$VIP/health)  ## Use VIP in this command
 		if [ $nginx_remote -eq '200' ];then
 			echo "VIP & Nginx on remote server are working fine. Exitting"
 		else
