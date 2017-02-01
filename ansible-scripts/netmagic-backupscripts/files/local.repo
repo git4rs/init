@@ -1,0 +1,6 @@
+[localrepo]
+name=localrepo
+baseurl=http://10.140.31.121/
+failovermethod=priority
+enabled=1
+gpgcheck=0

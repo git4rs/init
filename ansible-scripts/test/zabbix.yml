@@ -1,0 +1,21 @@
+---
+- hosts: mumbai-test
+  gather_facts: false
+  become: true
+  tasks:
+    - name: kill zabbix-agent
+      shell: "/bin/kill -9 $(ps -lef | grep zabbix_agent | grep -v grep | tr -s ' ' | awk '{print $4}' | tr -s '\n' ' ' | xargs echo)"
+      register: zb_status
+
+    - debug: msg="status of zabbix is {{ zb_status }}"
+      
+- hosts: mumbai-zabbix
+  gather_facts: false
+  become: true
+  tasks:
+    - name: start zabbix-agent
+      service: name=zabbix-agent state=started
+      register: zbx_status
+#      when: zb_status.rc == 0
+
+    - debug: msg="Status of zabbix on zabbix box is {{ zbx_status }}"

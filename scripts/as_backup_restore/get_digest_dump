@@ -1,0 +1,25 @@
+#!/bin/bash
+
+# Cleanup the Run Directory 
+rm -rf BB*
+rm -rf digtemp
+rm -rf dig
+
+
+# Take back of only digests no indexes or UDFs
+asbackup -h ${1} -p ${2} -n ${3} -s ${4} -d . -r -x -I -u 
+
+# Trim out information other that digest
+cat BB* | grep "+ d" | cut -d' ' -f 3 >> digtemp
+
+# Convert base64 encoded digest into bytearray 
+for i in `cat digtemp`
+do
+    echo $i | base64 --decode >> dig
+    # newline needed
+    echo "">>dig
+done
+
+# Cleanup temporary files
+rm -rf BB*
+rm -rf digtemp

@@ -1,0 +1,16 @@
+---
+- hosts: instances
+  become: yes
+  gather_facts: no
+  tasks:
+    - name: comment accounts.paytm.com
+      command: sed -i '/accounts.paytm.com/d' /etc/hosts
+      tags:
+        - "delete"
+        - "add"
+
+    - name: add accounts.paytm.com
+      shell: echo '10.0.5.74  accounts.paytm.com' >> /etc/hosts
+      tags:
+        - "add"
+

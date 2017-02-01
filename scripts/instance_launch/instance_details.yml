@@ -1,0 +1,13 @@
+instances:
+  - hostname: prod-zabbix-20-55
+    ip: 172.21.20.55
+    instance_type: m4.2xlarge
+    subnet_id: subnet-4675c62f
+    security_group_id: ['sg-05ec826c', 'sg-ff80f596']
+    ebs_size: 500
+  - hostname: prod-zabbix-20-56
+    ip: 172.21.20.56
+    instance_type: m4.2xlarge
+    subnet_id: subnet-4675c62f
+    security_group_id: ['sg-05ec826c', 'sg-ff80f596']
+    ebs_size: 500

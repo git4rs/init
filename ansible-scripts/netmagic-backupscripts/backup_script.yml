@@ -1,0 +1,48 @@
+---
+- hosts: pg-app
+  gather_facts: false
+  remote_user: rohit_13977
+  become: true
+  become_user: root
+
+  tasks:
+#  - name: Move all repos to old directory & create script folder
+#    shell: "mkdir /etc/yum.repos.d/old; mv /etc/yum.repos.d/* /etc/yum.repos.d/old; mkdir /root/script"
+#    ignore_errors: yes
+#
+#  - name: Create yum client with local repo
+#    copy: src=files/local.repo dest=/etc/yum.repos.d/local.repo owner=root group=root mode=0644
+#
+#  - name: Copy backup script
+#    template: src=templates/backup_general.sh.j2 dest=/root/script/backup_general.sh owner=root group=root mode=0744
+#
+#  - name: Install packages
+#    yum: name={{item}} state=present update_cache=yes
+#    with_items:
+#     - bzip2
+#     - rsync
+#     - postfix
+#     - mail
+#
+#  - name: Postfix configuration
+#    copy: src=files/main.cf dest=/etc/postfix/main.cf owner=root group=root mode=0644
+#
+#  - name: Postfix restart
+#    service: name=postfix state=started enabled=yes
+#  
+#  - name: create .ssh folder
+#    file: path=/root/.ssh/ owner=root group=root mode=0700 state=directory 
+#
+  - name: ssh-key remove
+    #shell: "rm -f /root/.ssh/id_rsa*; echo y | cp /nfs/home/rohit_13977/keys/id_rsa_pg /root/.ssh/id_rsa && chmod 0600 /root/.ssh/id_rsa"
+    shell: "rm -f /root/.ssh/id_rsa*"
+  - name: ssh-key upload
+    copy: src=files/{{rsa}} dest=/root/.ssh/id_rsa owner=root group=root mode=0600
+#
+#  - name: Remove old backup script & setup new script in cron 
+#    shell: "{{ item }}"
+#    with_items:
+#      - "crontab -l > /tmp/cron_backup"
+#      - "sed -i -E -e '/(compression_pg.sh|backup_general.sh)/d' /tmp/cron_backup"
+#      - "echo '15 00 * * * nohup /bin/bash /root/script/backup_general.sh &' >> /tmp/cron_backup"
+#      - "crontab < /tmp/cron_backup"

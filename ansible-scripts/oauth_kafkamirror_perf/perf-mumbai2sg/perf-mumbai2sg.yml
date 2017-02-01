@@ -1,0 +1,24 @@
+---
+-  hosts: mumbai-perf
+   gather_facts: false
+   become: true
+   tasks:
+     - name: Kill kafka mirror at Mumbai
+       shell: "/bin/kill -9 $(ps -lef | grep kafka.tools.MirrorMaker | grep -v grep | tr -s ' ' | awk '{print $4}' | tr -s '\n' ' ' | xargs echo)"
+
+-  hosts: mumbai-consumer
+   gather_facts: false
+   become: true
+   tasks:
+     - name: Killing consumers
+       shell: "/bin/kill -9 $(ps -lef | egrep -w 'tokudb-consumer|notification-consumer|profile-data-trigger-consumer' | grep -v grep | tr -s ' ' | awk '{print $4}' | tr -s '\n' ' ' | xargs echo)"
+
+-  hosts: sg-perf
+   gather_facts: false
+   become: true
+   tasks:
+     - name: Starting Kafka Mirror Maker for ES at Destination
+       shell: "cd /opt/confluent-3.0.0/ && nohup bin/kafka-mirror-maker --consumer.config etc/kafka/sourceCluster1Consumer_ES.config --num.streams 200 --producer.config etc/kafka/targetClusterProducer.config --whitelist='UserOfflineTokenHistory|UserUpdateHistory|UserOnlineOtpUpdate|UserDeviceMapping|UserOnlineOtp|UserTOTPHistory|UserOfflineTokenHistory'  >> /data/outputLogs/kafka_mm_es.logs &"
+
+     - name: Starting Kafka Mirror Maker for AS at Destination
+       shell: "cd /opt/confluent-3.0.0/ && nohup bin/kafka-mirror-maker --consumer.config etc/kafka/sourceCluster1Consumer_AS.config --num.streams 200 --producer.config etc/kafka/targetClusterProducer.config --whitelist='UserDevices|UserCookies|UserPreferences|RegisterUserIdMapping|HardBounceEmails' >> /data/outputLogs/kafka_mm_as.logs &"
