@@ -1,0 +1,95 @@
+#!/bin/bash
+
+cd /alog/oauth1/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd /alog/oauth2/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd /alog/oauth3/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd /alog/oauth4/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+cd /alog/request1/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd /alog/request2/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd /alog/request3/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+cd /alog/request4/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+cd  /alog/walletlogs/wallet-admin/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd  /alog/walletlogs/wallet-merchant/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd  /alog/walletlogs/wallet-web1/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd  /alog/walletlogs/wallet-web2/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd  /alog/walletlogs/wallet-web3/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/
+
+
+cd  /alog/walletlogs/wallet-web4/
+old_date=`date --date=yesterday +%Y-%m-%d`
+bzip2 *.$old_date*
+mkdir $old_date
+mv  *.$old_date*bz2 $old_date/

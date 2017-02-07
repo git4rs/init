@@ -1,0 +1,286 @@
+#!/usr/bin/perl
+## Author :- Rohit Sharma
+## Date:- 03-July-2015
+## Purpose :- To put/remove maintenance on zabbix hosts 
+use strict;
+use Getopt::Std;
+use vars qw/ %opt /;
+#use Net::DNS;  #All of our servers use their FQDN, this is used to ensure that during Maintenance creation
+use JSON;
+use Data::Dumper;
+
+
+ 
+my $url = "http://10.140.31.103/zabbix/api_jsonrpc.php"; # change <zabbix server> to your zabbix server
+my $apiuser="maintenance"; # API User's Username
+my $apipassword='h^u7zKa{>T'; # API User's password
+my $hostid;
+my $maintenanceid;
+ 
+#############
+# Begin main
+#
+init();
+
+my $hostname = $opt{s};
+my $duration = $opt{d} || 10800;
+
+ 
+## Change shortname to FQDN
+#my $res   = Net::DNS::Resolver->new;
+#my $query = $res->search($hostname);
+# 
+#if ($query) {
+#    foreach my $rr ($query->answer) {
+#        next unless $rr->type eq "A";
+#        $hostname = $rr->name;
+#    }
+#} else {
+#    warn "query failed: ", $res->errorstring, "\n";
+#}
+
+# Authenticate against Zabbix for API Maintenance addition
+my $auth = newrequest($url, $apiuser, $apipassword);
+if($opt{r}){
+    #print "Removing host $hostname from maintenance\n";
+    getmaintid($hostname);
+    exit(0);
+}else{
+    #Adding host in maintenance
+    $hostid = gethostid($hostname);
+    addmaint($hostid,$duration);
+}
+exit(0);
+ 
+
+#########################
+# Get command line input
+#
+sub init(){
+    my $opt_string = 'hrs:d:';
+    getopts( "$opt_string", \%opt ) or usage();
+    usage() if $opt{h};
+    usage() if !$opt{s};
+}
+#####################
+# Print script usage
+#
+sub usage(){
+    print STDERR << "EOF";
+usage: $0 [-hr] [-s hostname] [-d duration]
+ -h          : this (help) message   
+ -r          : remove maintenance for specified host 
+ -s hostname : hostname or IP 
+                hostname must match what is in Zabbix.  Zabbix uses FQDN. OR IP required
+ -d          : duration of maintenance in seconds.  leave blank to use default
+                300  = 5 minutes
+                1800 = half hour
+                3600 = 1 hour
+               10800 = 3 hour (default)
+                etc.
+ -s is required
+ 
+example: $0 -s hostname -d 3600
+example: $0 -s hostname -r
+EOF
+    exit;
+}
+ 
+#############################################
+# Zabbix API requests require authentication
+#
+sub newrequest {
+    my ($url, $user, $password) = @_;
+    #
+    my $authenticate = qq(curl -s -X POST -H 'Content-Type: application/json-rpc' -d '{
+    "jsonrpc": "2.0",
+    "method": "user.login",
+    "params": {
+        "user": "$user",
+        "password": "$password"
+    },
+    "id": 0 }' $url);
+    #my $auth = `$authenticate`;
+    my $json_text=`$authenticate`;
+    my $perl_scalar = decode_json $json_text;
+    my $auth=$perl_scalar->{result};
+	
+    #print "$auth\n\n";
+    chomp($auth);
+    return $auth;
+ }
+ 
+###################################################
+# Subroutine to query Zabbix to get maintenance id
+#
+sub getmaintid{
+#print "Into getmaintid function\n";
+#print "auth :- $auth\n";	
+    my $hostname = shift;
+    my $process = 'curl -s  -X POST -H \'Content-Type: application/json-rpc\' -d "{
+    \"jsonrpc\":\"2.0\",
+    \"method\":\"maintenance.get\",
+    \"params\":{
+        \"filter\":\"29\",
+        \"pattern\": \"server\",
+        \"output\": \"extend\",
+        \"select_hosts\": \"refer\",
+        \"select_groups\": \"refer\"
+    },
+    \"auth\":\"'.$auth.'\",
+    \"id\":2}" '.$url;
+ 
+    my $res = `$process`;
+    chomp($res);
+    
+    my $scalar = decode_json $res;
+    #print Dumper ($scalar->{result}[1]->{name});	
+    my $results=$scalar->{result};
+    foreach (@$results)
+	{
+	my $maintName=$_->{name};
+		if ($maintName =~ m/$hostname/)
+		{
+			#print "\nMaint NAME:- $maintName\n";
+			my $maintenanceid = $_->{maintenanceid};
+			#print "\nMaintenance ID:- $maintenanceid\n";
+			remmaint($maintenanceid);
+		}
+	}	
+   
+    if(!$maintenanceid){
+       print "WARNING - $hostname not found in maintenance for Zabbix.\n";
+       exit(1);
+    }
+}
+ 
+###########################################
+# Subroutine to query Zabbix to get hostid
+#
+sub gethostid{
+    my $hostname = shift;
+    my $process = qq(curl -s  -X POST -H 'Content-Type: application/json-rpc' -d '{
+      "jsonrpc":"2.0",
+      "method":"host.get",
+      "params":{
+          "output":"hostid",
+          "filter":{"ip":["$hostname"]}
+      },
+      "auth":"$auth",
+      "id": 0
+    }' $url);
+ 
+    my $res=`$process`;
+    #chomp($res);
+    #print "$res\n\n"; 
+    my $perl_scalar = decode_json $res;
+    my $hostid=$perl_scalar->{result}[0]{hostid};
+
+    if(!$hostid){
+        print "ERROR - $hostname not found in zabbix.  Make sure you're using the FQDN\n";
+	exit(1);
+    }
+    return $hostid;
+}
+ 
+#################################################
+# Subroutine to add maintenance window to Zabbix
+#
+sub addmaint{
+    #print "Into addmaint function\n\n";
+    $hostid = shift;
+    $duration = shift;
+    my $start = time();
+    my $end = ($start + $duration);
+
+    my $process = qq(curl -s -X POST -H \'Content-Type: application/json-rpc\' -d '{
+    "jsonrpc":"2.0",
+    "method":"maintenance.create",
+    "params":[{
+        "groupids":[],
+        "hostids":["$hostid"],
+        "name":"Maintenance for $hostname - $start",
+        "maintenance_type":"0",
+        "description":"Scripted maintenance",
+        "active_since":"$start",
+        "active_till":"$end",
+        "timeperiods": [{
+            "timeperiod_type": 0,
+            "start_date": "$start",
+            "period": $duration}]
+        }],
+    "auth":"$auth",
+    "id":3}' $url);
+
+    my $res = `$process`;
+    chomp($res);
+    my @output = split(/,/,$res);
+ 
+    foreach(@output){
+	if ($_ =~ m/\"error/){
+            print "$_\n";
+    	    exit(1);
+        }
+        chkmaint($hostname) if ($_ =~ m/\"result/);   ## Calling chkmain function if addmain return result
+    }
+ 
+}
+
+#################################################
+# Subroutine to check if host came into Maintenance or not
+#
+sub chkmaint{
+    my $hostname = shift;
+    my $counter = 30;
+    my $sleep=1;
+    while ($counter > 0) {
+    	my $process = qq(curl -s  -X POST -H 'Content-Type: application/json-rpc' -d '{
+    	  "jsonrpc":"2.0",
+    	  "method":"host.get",
+    	  "params":{
+    	      "output":["maintenance_status"],
+    	      "filter":{"ip":["$hostname"]}
+    	  },
+    	  "auth":"$auth",
+    	  "id": 0
+    	}' $url);
+ 
+    	my $res=`$process`;
+    	#chomp($res);
+    	my $perl_scalar = decode_json $res;
+    	my $maintStatus=$perl_scalar->{result}[0]{maintenance_status};
+    	if($maintStatus == '1'){
+    	    print "success";
+    	    exit(0);
+    	}
+    	if($counter == 0 && $maintStatus == '0'){
+    	    print "error";
+    	    exit(1);
+    	}
+    $counter--;    
+    sleep $sleep;
+    }
+
+}
+#################################################
+# Subroutine to remove maintenance window from Zabbix
+#
+sub remmaint{
+    $maintenanceid = shift;
+    my $process = 'curl -s -X POST -H \'Content-Type: application/json-rpc\' -d "{
+    \"jsonrpc\":\"2.0\",
+    \"method\":\"maintenance.delete\",
+    \"params\":[\"'.$maintenanceid.'\"],
+    \"auth\":\"'.$auth.'\",
+    \"id\":2}" '.$url;
+     my $res = `$process`;
+    chomp($res);
+ 
+    my @output = split(/,/,$res);
+ 
+    foreach(@output){
+        print "$_\n" if ($_ =~ m/\"error/);
+        print "success\n" if ($_ =~ m/\"result/);
+    }
+}
+

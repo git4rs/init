@@ -1,1 +1,0 @@
-This file is for merging into Master branch from new-branch2 branch.

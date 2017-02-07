@@ -98,12 +98,12 @@ def main(data):
                 try:
 		    print launch_instance(session, image_id, instance_type, key_name, subnet_id, hostname, ip, security_groups_id, ebs_size)
                 except Exception:
-                    print "Exception in hotname: {0}".format(hostname)
+                    print "Exception in hostname: {0}".format(hostname)
 	else:
             try:
 		print launch_instance(session, image_id, instance_type, key_name, subnet_id, hostname, ip, security_groups_id, ebs_size=False)
             except Exception:
-                print "Exception in hotname: {0}".format(hostname)
+                print "Exception in hostname: {0}".format(hostname)
 
 
 
