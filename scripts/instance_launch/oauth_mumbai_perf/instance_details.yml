@@ -1,0 +1,7 @@
+instances:
+  - hostname: perf-jenkins-24-132
+    ip: 172.21.24.132
+    instance_type: t2.small
+    subnet_id: subnet-92840cfb
+    security_group_id: ['sg-8887c9e1']
+    ebs_size: 100
