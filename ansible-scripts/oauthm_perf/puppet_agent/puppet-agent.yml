@@ -1,0 +1,13 @@
+---
+- hosts: oauthm_perf
+  become: yes
+  gather_facts: false
+  tasks:
+    - name: Copy puppet.conf file
+      copy: src=files/puppet.conf dest=/etc/puppetlabs/puppet/puppet.conf mode=0644 owner=root group=root
+
+    - name: Enable puppet on boot
+      shell: "/usr/sbin/update-rc.d puppet defaults"
+
+    - name: Run Puppet agent
+      shell: "/opt/puppetlabs/bin/puppet agent -t -d" 
