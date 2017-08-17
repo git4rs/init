@@ -3,15 +3,13 @@
 ## Date:- 28-Oct-2016
 ## Purpose:- To delete ES indices older than specified days & matching patterns
 
-esIP='10.140.31.29'
-esPort='9200'
+esIP='__ES_NODE_IP__'
+esPort='__ES_PORT__'
 days=8 ## Days to preserve indices including today
 dateFormat="%Y.%m.%d"  ## Indices date format
-esIP='10.140.31.29'
-esPort='9200'
 patterns='logstash-|wallet_' ## Patterns to match indices for deletion. Multiple patterns to be separated by pipe 
 excludePatterns='.kibana' ## Exclude index patterns for deletion. Multiple patterns to be separated by pipe
-email='infraops@paytm.com udai.mehra@paytm.com'  ## List of Email IDs separated by space to send notification in case of index deletion failure
+email='__EMAILIDS__'  ## List of Email IDs separated by space to send notification in case of index deletion failure
 baseDir='/var/log/ES_Delete'
 log="$baseDir/esIndices_delete_`date +%Y.%m.%d`.log"
 
